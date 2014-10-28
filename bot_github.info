@@ -1,0 +1,5 @@
+name = Bot Github
+description = Simple Github integration with Bot module.
+dependencies[] = bot
+package = Bot
+core = 7.x

@@ -1,0 +1,37 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function bot_github_menu() {
+  $items['admin/config/bot/github'] = array(
+    'access arguments' => array('administer bot'),
+    'description' => 'Configure Github integration.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bot_github_settings'),
+    'title' => 'Bot Github integration settings',
+    'file' => 'bot_github.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Listen for conversation directed at, or about, the bot.
+ *
+ * @param $data
+ *   The regular $data object prepared by the IRC library.
+ * @param $from_query
+ *   Boolean; whether this was a queried request.
+ */
+function bot_github_irc_msg_channel($data, $from_query = FALSE) {
+  $to = $from_query ? $data->nick : $data->channel;
+  $repo = rtrim(variable_get('bot_github_repo_url', ''), '/');
+
+  if ($repo && preg_match("/(?:^|\s|\[|\()#([0-9]+)\b/i", $data->message, $matches)) {
+    array_shift($matches);
+    foreach ($matches as $github_issue_number) {
+      bot_message($to, url("$repo/issues/$github_issue_number"));
+    }
+  }
+}
