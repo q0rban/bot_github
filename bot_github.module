@@ -28,7 +28,9 @@ function bot_github_irc_msg_channel($data, $from_query = FALSE) {
   $to = $from_query ? $data->nick : $data->channel;
   $repo = rtrim(variable_get('bot_github_repo_url', ''), '/');
 
-  if ($repo && preg_match("/(?:^|\s|\[|\()#([0-9]+)\b/i", $data->message, $matches)) {
+  // Match any #123 that are not preceded by 'build', to avoid Jenkins IRC bot
+  // conflicts.
+  if ($repo && preg_match("/(?<!build)(?:^|\s|\[|\()#([0-9]+)\b/i", $data->message, $matches)) {
     array_shift($matches);
     foreach ($matches as $github_issue_number) {
       bot_message($to, url("$repo/issues/$github_issue_number"));
